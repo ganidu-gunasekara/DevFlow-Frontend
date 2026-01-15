@@ -1,0 +1,84 @@
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+
+
+@layer base {
+  :root {
+    --bg: 248 250 252;        /* slate-50 */
+    --surface: 255 255 255;   /* white */
+    --surface-2: 241 245 249; /* slate-100 */
+
+    --text: 15 23 42;         /* slate-900 */
+    --muted: 100 116 139;     /* slate-500 */
+
+    --border: 226 232 240;    /* slate-200 */
+
+    --brand: 126 34 206;      /* purple-700 */
+    --brand-soft: 243 232 255;/* purple-100 */
+  }
+
+  html.dark {
+    --bg: 2 6 23;             /* slate-950 */
+    --surface: 15 23 42;      /* slate-900 */
+    --surface-2: 30 41 59;    /* slate-800 */
+
+    --text: 226 232 240;      /* slate-200 */
+    --muted: 148 163 184;     /* slate-400 */
+
+    --border: 51 65 85;       /* slate-700 */
+
+    --brand: 168 85 247;      /* purple-500 */
+    --brand-soft: 59 7 100;   /* deep purple */
+  }
+
+  body {
+    background: rgb(var(--bg));
+    color: rgb(var(--text));
+  }
+}
+
+@layer components {
+  /* Layout */
+  .app-page {
+    @apply min-h-screen bg-bg text-text;
+  }
+
+  .sidebar {
+    @apply bg-surface p-4 shadow-2xl border-r border-border;
+  }
+
+  .topbar {
+    @apply flex h-16 items-center px-4 w-full shadow-2xl bg-surface-2;
+  }
+
+  /* Buttons */
+  .icon-btn {
+    @apply p-2 rounded transition hover:opacity-90 hover:bg-surface;
+  }
+
+  .btn-primary {
+    @apply bg-brand text-white rounded-md px-6 py-2 transition;
+    @apply hover:opacity-90 active:opacity-80;
+  }
+
+  /* Nav items */
+  .sidebar-item {
+    @apply p-4 border-b border-border cursor-pointer transition;
+    @apply hover:bg-brand-soft hover:text-brand;
+  }
+
+  .sidebar-item--top {
+    @apply border-t border-border;
+  }
+
+  /* Form */
+  .form-footer {
+    @apply bg-surface px-6 py-4 shadow-2xl;
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-bg;
+  }
+}
