@@ -35,8 +35,8 @@ export async function apiFetch(path: string, options: ApiOptions) {
 
       if (refreshRes.ok) {
         const refreshData = await refreshRes.json();
-        useAuthStore.getState().setAccessToken(refreshData.access_token);
-        useAuthStore.getState().setAuth(refreshData.access_token, refreshData.user);
+        useAuthStore.getState().setAccessToken(refreshData.accessToken);
+        useAuthStore.getState().setAuth(refreshData.accessToken, refreshData.user);
         return apiFetch(path, { ...options, retry: false });
       } else {
         useAuthStore.getState().clearAuth();

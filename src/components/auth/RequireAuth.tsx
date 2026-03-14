@@ -12,6 +12,8 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const ready = useAuthStore((s) => s.isAuthReady);
 
   useEffect(() => {
+    console.log(token);
+    console.log(ready);
     if (ready && !token) {
       router.replace(`/sign-in?next=${encodeURIComponent(pathname)}`);
     }

@@ -1,34 +1,33 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
-
 @layer base {
   :root {
-    --bg: 248 250 252;        /* slate-50 */
-    --surface: 255 255 255;   /* white */
+    --bg: 248 250 252; /* slate-50 */
+    --surface: 255 255 255; /* white */
     --surface-2: 241 245 249; /* slate-100 */
 
-    --text: 15 23 42;         /* slate-900 */
-    --muted: 100 116 139;     /* slate-500 */
+    --text: 15 23 42; /* slate-900 */
+    --muted: 100 116 139; /* slate-500 */
 
-    --border: 226 232 240;    /* slate-200 */
+    --border: 226 232 240; /* slate-200 */
 
-    --brand: 126 34 206;      /* purple-700 */
-    --brand-soft: 243 232 255;/* purple-100 */
+    --brand: 126 34 206; /* purple-700 */
+    --brand-soft: 243 232 255; /* purple-100 */
   }
 
   html.dark {
-    --bg: 2 6 23;             /* slate-950 */
-    --surface: 15 23 42;      /* slate-900 */
-    --surface-2: 30 41 59;    /* slate-800 */
+    --bg: 2 6 23; /* slate-950 */
+    --surface: 15 23 42; /* slate-900 */
+    --surface-2: 30 41 59; /* slate-800 */
 
-    --text: 226 232 240;      /* slate-200 */
-    --muted: 148 163 184;     /* slate-400 */
+    --text: 226 232 240; /* slate-200 */
+    --muted: 148 163 184; /* slate-400 */
 
-    --border: 51 65 85;       /* slate-700 */
+    --border: 51 65 85; /* slate-700 */
 
-    --brand: 168 85 247;      /* purple-500 */
-    --brand-soft: 59 7 100;   /* deep purple */
+    --brand: 168 85 247; /* purple-500 */
+    --brand-soft: 59 7 100; /* deep purple */
   }
 
   body {
@@ -44,11 +43,11 @@
   }
 
   .sidebar {
-    @apply bg-surface p-4 shadow-2xl border-r border-border;
+    @apply bg-surface-2 p-4 border-r border-border w-1/4;
   }
 
   .topbar {
-    @apply flex h-16 items-center px-4 w-full shadow-2xl bg-surface-2;
+    @apply flex h-12 items-center px-4 w-full shadow-2xl bg-surface-2;
   }
 
   /* Buttons */
@@ -58,6 +57,16 @@
 
   .btn-primary {
     @apply bg-brand text-white rounded-md px-6 py-2 transition;
+    @apply hover:opacity-90 active:opacity-80;
+  }
+
+  .btn-warning {
+    @apply bg-yellow-600 text-white rounded-md px-6 py-2 transition;
+    @apply hover:opacity-90 active:opacity-80;
+  }
+
+  .btn-danger {
+    @apply bg-red-700 text-white rounded-md px-6 py-2 transition;
     @apply hover:opacity-90 active:opacity-80;
   }
 
@@ -73,12 +82,34 @@
 
   /* Form */
   .form-footer {
-    @apply bg-surface px-6 py-4 shadow-2xl;
+    @apply bg-surface px-6 py-2 shadow-2xl;
+  }
+
+  .table-header {
+    @apply bg-brand;
+  }
+
+  .header-card {
+    @apply flex flex-row bg-surface-2 h-16 rounded shadow mt-3 mb-3 w-full items-center px-3;
+  }
+
+  .label {
+    @apply text-xs sm:text-sm md:text-base;
+    color: rgb(var(--text));
+  }
+
+  .input-text {
+    @apply w-full h-9 px-3 rounded-md border border-border bg-surface text-text text-sm;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand;
   }
 }
 
 @layer utilities {
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-bg;
+  }
+
+  .page-height {
+    height: calc(100vh - 48px); 
   }
 }

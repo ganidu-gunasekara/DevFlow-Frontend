@@ -9,7 +9,7 @@ type RegisterResponse = {
 };
 
 export type LoginResponse = {
-  access_token: string;
+  accessToken: string;
   user: any;
 };
 
@@ -32,7 +32,7 @@ export async function loginUser(
   });
 }
 
-export async function refreshToken(): Promise<{ access_token: string }> {
+export async function refreshToken(): Promise<{ accessToken: string }> {
   return apiFetch("/auth/refresh", {
     method: "POST",
     credentials: "include",

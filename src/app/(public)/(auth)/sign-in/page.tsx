@@ -3,67 +3,64 @@
 import { TextField } from "@/src/components/form/TextField";
 import { loginUser } from "@/src/lib/auth/authApi";
 import { useAuthStore } from "@/src/lib/auth/authStore";
-import { FormErrors, LoginFormValues, validateLogin } from "@/src/lib/auth/authValidation";
+import { FormErrors, validateLogin } from "@/src/lib/auth/authValidation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useState } from "react";
+import { useForm } from "react-hook-form";
 import { FaGoogle } from "react-icons/fa";
+import z, { email, set } from "zod";
+import { da } from "zod/locales";
 
-const initialValues: LoginFormValues = {
-  email: "",
-  password: "",
-};
+const loginSchema = z.object({
+  email: z.email("Enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function SignInPage() {
-
+  const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const [form, setForm] = useState<LoginFormValues>(initialValues)
-  const [errors, setErrors] = useState<FormErrors<LoginFormValues>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  function handleChange(e : ChangeEvent<HTMLInputElement>){
-    const {name, value} = e.target;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: { email: "", password: "" },
+  });
 
-    setForm ((prev) =>({
-      ...prev, [name] : value
-    }))
-
-    setErrors ((prev) =>({
-      ...prev, [name] : undefined
-    }))
-  }
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const onSubmit = async (values: LoginFormValues) => {
     setServerError("");
     setSuccessMessage("");
 
-    const validationErrors = validateLogin(form);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-     try {
-      const data = await loginUser(form);
-      setAuth(data.access_token, data.user);
-      setSuccessMessage("Login successfull!");
-      setForm(initialValues);
+    try {
+      const data = await loginUser(values);
+      setAuth(data.accessToken, data.user);
+      setSuccessMessage("Login successful!");
+      reset();
+      router.push('/dashboard')
     } catch (err: any) {
       console.error(err);
-      setServerError(err.message || "Network error. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      const message = err?.message || "Network error. Please try again.";
+      setServerError(message);
     }
-  }
+  };
   return (
     <main className="min-h-screen  bg-slate-200 bg-none lg:bg-[url('/sign-up-in-assets/sign-up-background.jpg')] bg-cover bg-center bg-no-repeat">
       <div className="flex justify-center lg:justify-end w-full min-h-screen">
         <div className="flex flex-col items-center w-full lg:w-1/2 bg-white border-l rounded-tl-2xl rounded-bl-2xl p-4">
-          <img src="/devflow-logo.png" alt="DevFlow Logo" className="w-20 mb-4"/>
+          <img
+            src="/devflow-logo.png"
+            alt="DevFlow Logo"
+            className="w-20 mb-4"
+          />
 
           <h1 className="text-2xl font-poppins font-semibold">
             Create an account
@@ -75,15 +72,31 @@ export default function SignInPage() {
             <p className="mt-2 text-sm text-green-600">{successMessage}</p>
           )}
 
-          <form className="flex flex-col w-full max-w-sm space-y-4 mt-3"
-           onSubmit={handleSubmit}
+          <form
+            className="flex flex-col w-full max-w-sm space-y-4 mt-3"
+            onSubmit={handleSubmit(onSubmit)}
           >
-            <TextField label="Email Address" name="email" type="email" placeholder="Enter your email address" value={form.email} onChange={handleChange} error={errors.email}/>
-            <TextField label="Password" name="password" type="password" placeholder="Create your password" value={form.password} onChange={handleChange} error={errors.password}/>
+            <TextField
+              label="Email Address"
+              name="email"
+              type="email"
+              placeholder="Enter your email address"
+              error={errors.email?.message}
+              inputProps={{ ...register("email"), autoComplete: "email" }}
+            />
+            <TextField
+              label="Password"
+              name="password"
+              type="password"
+              placeholder="Create your password"
+              error={errors.password?.message}
+              inputProps={{ ...register("password"), autoComplete: "password" }}
+            />
 
             <div className="flex flex-col space-y-1 m-2">
-              <button className="flex items-center justify-center bg-purple-700 text-white font-poppins font-medium p-3 w-full border rounded-3xl"
-              disabled = {isSubmitting}
+              <button
+                className="flex items-center justify-center bg-purple-700 text-white font-poppins font-medium p-3 w-full border rounded-3xl"
+                disabled={isSubmitting}
               >
                 Login
                 {isSubmitting && (
@@ -95,7 +108,9 @@ export default function SignInPage() {
               <span className="font-poppins font-medium text-sm text-gray-500">
                 Don&apos;t have an account?
               </span>
-              <a className="text-purple-700 underline" href="/sign-up">Sign Up</a>
+              <a className="text-purple-700 underline" href="/sign-up">
+                Sign Up
+              </a>
             </div>
           </form>
 
