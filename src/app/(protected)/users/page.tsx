@@ -1,7 +1,11 @@
 "use client";
 import MainTable from "@/src/components/ui/MainTable";
+import SelectOptions from "@/src/components/ui/SelectOptions";
+import { getCompanies } from "@/src/lib/company/companyApi";
 import { getUsers } from "@/src/lib/user/userApi";
 import { useEffect, useRef, useState } from "react";
+import Select from "react-select";
+import AsyncSelect from "react-select/async";
 
 export default function User() {
   interface User {
@@ -12,9 +16,10 @@ export default function User() {
     email: "",
     name: "",
     password: "",
-    confirmPassword: "",
+    confirm_password: "",
     type: "",
-    company: "",
+    company_id: "",
+    company_name: "",
   });
 
   const handleChange = (
@@ -26,11 +31,18 @@ export default function User() {
   const [activeTab, setActiveTab] = useState<"all" | "new">("all");
   const [userList, setUserList] = useState([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const loadCompanies = async (inputValue?: string) => {
+    return await getCompanies({}, true);
+  };
   const columns = [
     { accessorKey: "id", header: "ID" },
     { accessorKey: "name", header: "Name" },
     { accessorKey: "email", header: "Email" },
     { accessorKey: "action", header: "Action" },
+  ];
+  const typeOptions = [
+    { value: "DEVELOPER", label: "Developer" },
+    { value: "ADMIN", label: "Admin" },
   ];
   useEffect(() => {
     const fetchData = async () => {
@@ -100,97 +112,102 @@ export default function User() {
         {activeTab == "new" && (
           <div className="flex flex-col w-full h-full">
             <form className="flex flex-col w-full h-full">
-              <div className="flex flex-1 flex-col gap-4 bg-surface p-6 rounded shadow overflow-y-auto ">
-                {/* Email */}
-                <div className="flex flex-col gap-1">
-                  <label className="label">Email</label>
-                  <input
-                    className="input-text"
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </div>
+              <div className="flex flex-col flex-1 bg-surface p-6 rounded shadow overflow-y-auto">
+                <div className="grid grid-cols-12  gap-4">
+                  <div className="col-span-12 md:col-span-3 gap-1">
+                    <label className="label">Email</label>
+                    <input
+                      className="input-text"
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
 
-                {/* Name */}
-                <div className="flex flex-col gap-1">
-                  <label className="label">Name</label>
-                  <input
-                    className="input-text"
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
-                </div>
+                  <div className="col-span-12 md:col-span-3 gap-1">
+                    <label className="label">Name</label>
+                    <input
+                      className="input-text"
+                      type="text"
+                      name="name"
+                      placeholder="Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                  </div>
 
-                {/* Password */}
-                <div className="flex flex-col gap-1">
-                  <label className="label">Password</label>
-                  <input
-                    className="input-text"
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                </div>
+                  {!selectedUser && (
+                    <>
+                      <div className="col-span-12 md:col-span-3 gap-1">
+                        <label className="label">Password</label>
+                        <input
+                          className="input-text"
+                          type="password"
+                          name="password"
+                          placeholder="Password"
+                          value={formData.password}
+                          onChange={handleChange}
+                        />
+                      </div>
 
-                {/* Confirm Password */}
-                <div className="flex flex-col gap-1">
-                  <label className="label">Confirm Password</label>
-                  <input
-                    className="input-text"
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                  />
-                  {/* password mismatch warning */}
-                  {formData.confirmPassword &&
-                    formData.password !== formData.confirmPassword && (
-                      <span className="text-xs text-red-500">
-                        Passwords do not match
-                      </span>
-                    )}
-                </div>
+                      <div className="col-span-12 md:col-span-3 gap-1">
+                        <label className="label">Confirm Password</label>
+                        <input
+                          className="input-text"
+                          type="password"
+                          name="confirmPassword"
+                          placeholder="Confirm Password"
+                          value={formData.confirm_password}
+                          onChange={handleChange}
+                        />
 
-                {/* User Type */}
-                <div className="flex flex-col gap-1">
-                  <label className="label">User Type</label>
-                  <select
-                    className="input-text"
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select Type</option>
-                    <option value="DEVELOPER">Developer</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
-                </div>
+                        {formData.confirm_password &&
+                          formData.password !== formData.confirm_password && (
+                            <span className="text-xs text-red-500">
+                              Passwords do not match
+                            </span>
+                          )}
+                      </div>
+                    </>
+                  )}
 
-                {/* Company */}
-                <div className="flex flex-col gap-1">
-                  <label className="label">Company</label>
-                  <select
-                    className="input-text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select Company</option>
-                    {/* populate from API later */}
-                  </select>
+                  <div className="col-span-12 md:col-span-3 flex flex-col gap-1">
+                    <label className="label">User Type</label>
+                    <Select
+                      options={typeOptions}
+                      value={
+                        typeOptions.find((o) => o.value === formData.type) ||
+                        null
+                      }
+                      onChange={() => {}}
+                      placeholder="Select Type"
+                      isClearable
+                    />
+                  </div>
+
+                  <div className="col-span-12 md:col-span-3 flex flex-col gap-1">
+                    <label className="label">Company</label>
+                    <SelectOptions
+                      loadFunction={loadCompanies}
+                      value={formData.company_id}
+                      displayValue={formData.company_name}
+                      onChange={(option: any) =>{
+                        setFormData((prev) => ({
+                          ...prev,
+                          company_id: option?.value,
+                          company_name: option?.label,
+                        }))
+                      
+                      }}
+                      placeholder="Search company..."
+                      isClearable={true}
+                    />
+                  </div>
                 </div>
               </div>
 
-      
               <div className="form-footer flex justify-end gap-2">
                 <button
                   type="button"
