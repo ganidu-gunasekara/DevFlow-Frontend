@@ -21,6 +21,7 @@ export default function SelectOptions({
   const onMenuOpen = async () => {
     const loadedOptions = await loadFunction();
     setOptions(loadedOptions);
+    console.log(loadedOptions);
   };
   return (
     <Select
