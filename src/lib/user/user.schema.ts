@@ -32,14 +32,16 @@ export const createUserDefaults: CreateUserPayload = {
 };
 
 
-export type SearchUserPayload = {
-  keyword: string;
-  showDeleted: boolean;
-};
+export interface SearchUserPayload {
+    keyword: string;
+    showDeleted: boolean;
+    company_id: number;
+}
 
 export const searchUserDefaults: SearchUserPayload = {
   keyword: "",
   showDeleted: false,
+  company_id: 0,
 };
 
 

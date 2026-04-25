@@ -3,7 +3,7 @@ import { CreateUserPayload, SearchUserPayload } from "./user.schema";
 
 
 export async function getUsers(pageNum = 0, search: SearchUserPayload) {
-    return await apiFetch(`/users/get?page=${pageNum}&size=${20}&keyword=${search.keyword}&showDeleted=${search.showDeleted}`, {
+    return await apiFetch(`/users/get?page=${pageNum}&size=${20}&keyword=${search.keyword}&show_deleted=${search.showDeleted}&company_id=${search.company_id ?? 0}`, {
         method: "GET",
         credentials: 'include'
     });

@@ -20,6 +20,7 @@ import {
 } from "@/src/lib/user/user.schema";
 import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
+import Popup from "@/src/components/ui/Popup";
 
 interface User {
   id: number;
@@ -48,6 +49,7 @@ export default function User() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const isSearching = useRef(false);
@@ -118,35 +120,47 @@ export default function User() {
     setHasMore(true);
     setUserList([]);
     fetchData(0, searchForm);
-    setTimeout(() => isSearching.current = false, 500);
-};
+    setTimeout(() => (isSearching.current = false), 500);
+  };
 
-const handleReset = () => {
+  const handleReset = () => {
     isSearching.current = true;
     setPage(0);
     setHasMore(true);
     setUserList([]);
     setSearchForm(searchUserDefaults);
     fetchData(0, searchUserDefaults);
-    setTimeout(() => isSearching.current = false, 500);
-};
+    setTimeout(() => (isSearching.current = false), 500);
+  };
 
-  const handleDelete = async (user: User) => {
-    if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
+  const handleDelete = (user: User) => {
+    setDeleteTarget(user);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteUser(user.id);
-      setUserList((prev) => prev.filter((u) => u.id !== user.id));
+      await deleteUser(deleteTarget.id);
+      setUserList((prev) => prev.filter((u) => u.id !== deleteTarget.id));
     } catch (err: any) {
       setServerError(err?.message || "Something went wrong");
+    } finally {
+      setDeleteTarget(null);
     }
   };
+
   useEffect(() => {
     fetchData(0);
   }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore && !loadingUsers && !isSearching.current) {
+      if (
+        entries[0].isIntersecting &&
+        hasMore &&
+        !loadingUsers &&
+        !isSearching.current
+      ) {
         const nextPage = page + 1;
         setPage(nextPage);
         fetchData(nextPage);
@@ -185,53 +199,65 @@ const handleReset = () => {
 
       <div className="w-full p-3 flex flex-col flex-1 min-h-0">
         {activeTab === "all" && (
-          <div className="flex flex-col w-full flex-1 min-h-0">
-            <form className="w-full" onSubmit={handleSearch}>
-              <div className="header-card gap-2">
-                <div className="flex flex-row items-center gap-2">
-                  <label className="label">User</label>
-                  <input
-                    className="input-text"
-                    type="text"
-                    name="keyword"
-                    placeholder="Search users..."
-                    value={searchForm.keyword}
-                    onChange={(e) =>
-                      setSearchForm((prev) => ({
-                        ...prev,
-                        keyword: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <button type="submit" className="btn-primary">
-                  {loadingUsers ? "Searching..." : "Search"}
-                </button>
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={handleReset}
-                >
-                  Reset
-                </button>
-              </div>
-            </form>
-
-            <div className="flex flex-col overflow-y-auto flex-1 min-h-0">
-              <MainTable
-                columns={COLUMNS}
-                data={userList}
-                includeDelete
-                includeEdit
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+          <>
+            {deleteTarget !== null && (
+              <Popup
+                title="Delete User"
+                body={`Are you sure you want to delete ${deleteTarget.name}?`}
+                btnValue1="Delete"
+                onCancel={() => setDeleteTarget(null)}
+                onConfirm={confirmDelete}
               />
-              <div ref={loaderRef} className="py-4 text-center text-muted">
-                {loadingUsers && "Loading..."}
-                {!hasMore && "No more users"}
+            )}
+
+            <div className="flex flex-col w-full flex-1 min-h-0">
+              <form className="w-full" onSubmit={handleSearch}>
+                <div className="header-card gap-2">
+                  <div className="flex flex-row items-center gap-2">
+                    <label className="label">User</label>
+                    <input
+                      className="input-text"
+                      type="text"
+                      name="keyword"
+                      placeholder="Search users..."
+                      value={searchForm.keyword}
+                      onChange={(e) =>
+                        setSearchForm((prev) => ({
+                          ...prev,
+                          keyword: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary">
+                    {loadingUsers ? "Searching..." : "Search"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={handleReset}
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+
+              <div className="flex flex-col overflow-y-auto flex-1 min-h-0">
+                <MainTable
+                  columns={COLUMNS}
+                  data={userList}
+                  includeDelete
+                  includeEdit
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+                <div ref={loaderRef} className="py-4 text-center text-muted">
+                  {loadingUsers && "Loading..."}
+                  {!hasMore && "No more users"}
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
 
         {activeTab === "new" && (

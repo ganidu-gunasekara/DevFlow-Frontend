@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 export function SideBar() {
   const titles  = {
     User: "/users",
-    Company: "/companies",
-    Project: "/projects",
+    Company: "/company",
+    Project: "/project",
   };
   const router = useRouter();
   return (
