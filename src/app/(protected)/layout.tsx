@@ -13,9 +13,9 @@ export default function ProtectedLayout({
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   return (
     <RequireAuth>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col h-screen overflow-hidden">
         <Topbar openMenu={openMenu} setOpenMenu={setOpenMenu} />
-        <div className="flex flex-row flex-1">
+        <div className="flex flex-row flex-1 min-h-0">
           {openMenu && <SideBar />}
           {children}
         </div>

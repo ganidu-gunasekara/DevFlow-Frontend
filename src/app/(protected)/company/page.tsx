@@ -14,6 +14,7 @@ import {
   CreateCompanyPayload,
 } from "@/src/lib/company/company.schema";
 import { useEffect, useState } from "react";
+import { Building2, Plus } from "lucide-react";
 
 interface Company {
   id: number;
@@ -21,16 +22,16 @@ interface Company {
 }
 
 const COLUMNS = [
-  { accessorKey: "id", header: "ID" },
+  { accessorKey: "id",           header: "ID" },
   { accessorKey: "company_name", header: "Company Name" },
-  { accessorKey: "action", header: "Action" },
+  { accessorKey: "action",       header: "Action" },
 ];
 
 export default function CompanyPage() {
-  const [activeTab, setActiveTab] = useState<"all" | "new">("all");
-  const [companyList, setCompanyList] = useState<Company[]>([]);
-  const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab]       = useState<"all" | "new">("all");
+  const [companyList, setCompanyList]   = useState<Company[]>([]);
+  const [serverError, setServerError]   = useState("");
+  const [loading, setLoading]           = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Company | null>(null);
 
   const { formData, handleChange, resetForm, validate, errors } =
@@ -68,9 +69,7 @@ export default function CompanyPage() {
     setServerError("");
   };
 
-  const handleDelete = (company: Company) => {
-    setDeleteTarget(company);
-  };
+  const handleDelete  = (company: Company) => setDeleteTarget(company);
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
@@ -84,64 +83,80 @@ export default function CompanyPage() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   return (
-    <div className="flex flex-col w-full border-b border-border page-height">
-      <div className="flex justify-end w-full mt-4">
-        <div
-          onClick={() => setActiveTab("all")}
-          className={`px-6 py-3 cursor-pointer transition text-lg border border-border rounded-tl
-            ${
-              activeTab === "all"
-                ? "bg-surface text-brand border-b-surface"
-                : "bg-surface-2 text-muted hover:text-brand hover:bg-brand-soft"
-            }`}
-        >
-          All
-        </div>
-        <div
-          onClick={() => setActiveTab("new")}
-          className={`px-6 py-3 cursor-pointer transition text-lg border border-border rounded-tl
-            ${
-              activeTab === "new"
-                ? "bg-surface text-brand border-b-surface"
-                : "bg-surface-2 text-muted hover:text-brand hover:bg-brand-soft"
-            }`}
-        >
-          Add New
+    <div className="flex flex-col w-full flex-1 min-h-0 overflow-hidden">
+
+      {/* Page header */}
+      <div className="page-header">
+        <div className="flex items-center gap-3">
+          <div className="page-icon"><Building2 size={18} /></div>
+          <div>
+            <h1 className="text-lg font-bold text-text tracking-tight leading-tight">Companies</h1>
+            <p className="text-xs text-muted mt-px">Manage your organisations</p>
+          </div>
         </div>
       </div>
 
-      <div className="w-full p-3 flex flex-col flex-1 min-h-0">
+      {/* Tabs */}
+      <div className="tab-bar">
+        <button
+          type="button"
+          className={`page-tab${activeTab === "all" ? " page-tab--active" : ""}`}
+          onClick={() => setActiveTab("all")}
+        >
+          <Building2 size={14} />
+          All Companies
+        </button>
+        <button
+          type="button"
+          className={`page-tab${activeTab === "new" ? " page-tab--active" : ""}`}
+          onClick={() => setActiveTab("new")}
+        >
+          <Plus size={14} />
+          Add New
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="page-content">
+
         {activeTab === "all" && (
           <>
             {deleteTarget !== null && (
               <Popup
                 title="Delete Company"
-                body={`Are you sure you want to delete ${deleteTarget.company_name}?`}
+                body={`Are you sure you want to delete "${deleteTarget.company_name}"? This action cannot be undone.`}
                 btnValue1="Delete"
                 onCancel={() => setDeleteTarget(null)}
                 onConfirm={confirmDelete}
               />
             )}
 
-            <div className="flex flex-col w-full flex-1 min-h-0">
+            <div className="flex flex-col flex-1 min-h-0">
               <div className="header-card">
-                <span className="label font-semibold">Companies</span>
+                <Building2 size={14} className="text-muted" />
+                <span className="text-sm font-semibold text-text">
+                  {companyList.length} {companyList.length === 1 ? "company" : "companies"}
+                </span>
               </div>
 
-              <div className="flex flex-col overflow-y-auto flex-1 min-h-0">
+              <div className="scroll-area">
                 <MainTable
                   columns={COLUMNS}
                   data={companyList}
                   includeDelete
                   onDelete={handleDelete}
                 />
-                <div className="py-4 text-center text-muted">
-                  {loading && "Loading..."}
+                <div className="list-footer">
+                  {loading && (
+                    <span>
+                      <span className="loading-dot" />
+                      <span className="loading-dot" />
+                      <span className="loading-dot" />
+                    </span>
+                  )}
                   {!loading && companyList.length === 0 && "No companies found"}
                 </div>
               </div>
@@ -150,42 +165,31 @@ export default function CompanyPage() {
         )}
 
         {activeTab === "new" && (
-          <div className="flex flex-col w-full h-full">
-            <form
-              className="flex flex-col w-full h-full"
-              onSubmit={handleSubmit}
-            >
-              <div className="flex flex-col flex-1 bg-surface p-6 rounded shadow overflow-y-auto">
-                {serverError && (
-                  <div className="mb-4 text-sm text-red-500">{serverError}</div>
-                )}
+          <div className="flex flex-col flex-1">
+            <form className="flex flex-col flex-1" onSubmit={handleSubmit}>
+              <div className="form-card flex-1">
+                {serverError && <div className="error-alert">{serverError}</div>}
 
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-12 md:col-span-3">
-                    <FormField label="Company Name" error={errors.company_name}>
-                      <input
-                        className="input-text"
-                        type="text"
-                        name="company_name"
-                        placeholder="Company name"
-                        value={formData.company_name}
-                        onChange={handleChange}
-                      />
-                    </FormField>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <FormField label="Company Name" error={errors.company_name}>
+                    <input
+                      className="input-text"
+                      type="text"
+                      name="company_name"
+                      placeholder="Acme Corporation"
+                      value={formData.company_name}
+                      onChange={handleChange}
+                    />
+                  </FormField>
                 </div>
               </div>
 
-              <div className="form-footer flex justify-end gap-2">
-                <button
-                  type="button"
-                  className="btn-warning"
-                  onClick={handleCancel}
-                >
+              <div className="form-footer mt-3">
+                <button type="button" className="btn-warning" onClick={handleCancel}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
-                  Save
+                  Save Company
                 </button>
               </div>
             </form>

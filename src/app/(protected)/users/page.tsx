@@ -21,6 +21,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import Popup from "@/src/components/ui/Popup";
+import { Users, UserPlus, Search, RotateCcw } from "lucide-react";
 
 interface User {
   id: number;
@@ -51,7 +52,6 @@ export default function User() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
-
   const isSearching = useRef(false);
 
   const { formData, setFormData, handleChange, resetForm, validate, errors } =
@@ -82,7 +82,6 @@ export default function User() {
       } else {
         await createUser(formData);
       }
-
       setActiveTab("all");
       fetchData(0);
       setServerError("");
@@ -101,7 +100,6 @@ export default function User() {
       setActiveTab("new");
       setServerError("");
     } catch (err: any) {
-      console.error(err);
       setServerError(err?.message || "Something went wrong");
     }
   };
@@ -133,9 +131,7 @@ export default function User() {
     setTimeout(() => (isSearching.current = false), 500);
   };
 
-  const handleDelete = (user: User) => {
-    setDeleteTarget(user);
-  };
+  const handleDelete = (user: User) => setDeleteTarget(user);
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
@@ -171,33 +167,44 @@ export default function User() {
   }, [page, hasMore, loadingUsers]);
 
   return (
-    <div className="flex flex-col w-full border-b border-border page-height">
-      <div className="flex justify-end w-full mt-4">
-        <div
-          onClick={() => setActiveTab("all")}
-          className={`px-6 py-3 cursor-pointer transition text-lg border border-border rounded-tl
-            ${
-              activeTab === "all"
-                ? "bg-surface text-brand border-b-surface"
-                : "bg-surface-2 text-muted hover:text-brand hover:bg-brand-soft"
-            }`}
-        >
-          All
-        </div>
-        <div
-          onClick={() => setActiveTab("new")}
-          className={`px-6 py-3 cursor-pointer transition text-lg border border-border rounded-tl
-            ${
-              activeTab === "new"
-                ? "bg-surface text-brand border-b-surface"
-                : "bg-surface-2 text-muted hover:text-brand hover:bg-brand-soft"
-            }`}
-        >
-          {selectedUser ? `ID : ${selectedUser.id}` : "Add New"}
+    <div className="flex flex-col w-full flex-1 min-h-0 overflow-hidden">
+      {/* Page header */}
+      <div className="page-header">
+        <div className="flex items-center gap-3">
+          <div className="page-icon">
+            <Users size={18} />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-text tracking-tight leading-tight">
+              Users
+            </h1>
+            <p className="text-xs text-muted mt-px">Manage your team members</p>
+          </div>
         </div>
       </div>
 
-      <div className="w-full p-3 flex flex-col flex-1 min-h-0">
+      {/* Tabs */}
+      <div className="tab-bar">
+        <button
+          type="button"
+          className={`page-tab${activeTab === "all" ? " page-tab--active" : ""}`}
+          onClick={() => setActiveTab("all")}
+        >
+          <Users size={14} />
+          All Users
+        </button>
+        <button
+          type="button"
+          className={`page-tab${activeTab === "new" ? " page-tab--active" : ""}`}
+          onClick={() => setActiveTab("new")}
+        >
+          <UserPlus size={14} />
+          {selectedUser ? `Edit · ID ${selectedUser.id}` : "Add New"}
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="page-content">
         {activeTab === "all" && (
           <>
             {deleteTarget !== null && (
@@ -210,39 +217,42 @@ export default function User() {
               />
             )}
 
-            <div className="flex flex-col w-full flex-1 min-h-0">
-              <form className="w-full" onSubmit={handleSearch}>
-                <div className="header-card gap-2">
-                  <div className="flex flex-row items-center gap-2">
-                    <label className="label">User</label>
-                    <input
-                      className="input-text"
-                      type="text"
-                      name="keyword"
-                      placeholder="Search users..."
-                      value={searchForm.keyword}
-                      onChange={(e) =>
-                        setSearchForm((prev) => ({
-                          ...prev,
-                          keyword: e.target.value,
-                        }))
-                      }
-                    />
+            <div className="flex flex-col flex-1 min-h-0">
+              {/* Search bar */}
+              <form onSubmit={handleSearch}>
+                <div className="header-card">
+                  <Search size={15} className="text-muted shrink-0" />
+                  <input
+                    className="input-text flex-1 max-w-xs"
+                    type="text"
+                    name="keyword"
+                    placeholder="Search users by name or email…"
+                    value={searchForm.keyword}
+                    onChange={(e) =>
+                      setSearchForm((prev) => ({
+                        ...prev,
+                        keyword: e.target.value,
+                      }))
+                    }
+                  />
+                  <div className="ml-auto flex gap-2">
+                    <button type="submit" className="btn-primary">
+                      <Search size={13} />
+                      {loadingUsers ? "Searching…" : "Search"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-warning"
+                      onClick={handleReset}
+                    >
+                      <RotateCcw size={13} />
+                      Reset
+                    </button>
                   </div>
-                  <button type="submit" className="btn-primary">
-                    {loadingUsers ? "Searching..." : "Search"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    onClick={handleReset}
-                  >
-                    Reset
-                  </button>
                 </div>
               </form>
 
-              <div className="flex flex-col overflow-y-auto flex-1 min-h-0">
+              <div className="scroll-area">
                 <MainTable
                   columns={COLUMNS}
                   data={userList}
@@ -251,9 +261,15 @@ export default function User() {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
-                <div ref={loaderRef} className="py-4 text-center text-muted">
-                  {loadingUsers && "Loading..."}
-                  {!hasMore && "No more users"}
+                <div ref={loaderRef} className="list-footer">
+                  {loadingUsers && (
+                    <span>
+                      <span className="loading-dot" />
+                      <span className="loading-dot" />
+                      <span className="loading-dot" />
+                    </span>
+                  )}
+                  {!hasMore && !loadingUsers && "You've reached the end"}
                 </div>
               </div>
             </div>
@@ -261,124 +277,107 @@ export default function User() {
         )}
 
         {activeTab === "new" && (
-          <div className="flex flex-col w-full h-full">
-            <form
-              className="flex flex-col w-full h-full"
-              onSubmit={handleSubmit}
-            >
-              <div className="flex flex-col flex-1 bg-surface p-6 rounded shadow overflow-y-auto">
+          <div className="flex flex-col flex-1">
+            <form className="flex flex-col flex-1" onSubmit={handleSubmit}>
+              <div className="form-card flex-1 overflow-y-auto">
                 {serverError && (
-                  <div className="mb-4 text-sm text-red-500">{serverError}</div>
+                  <div className="error-alert">{serverError}</div>
                 )}
 
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-12 md:col-span-3">
-                    <FormField label="Email" error={errors.email}>
-                      <input
-                        className="input-text"
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                      />
-                    </FormField>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <FormField label="Email" error={errors.email}>
+                    <input
+                      className="input-text"
+                      type="email"
+                      name="email"
+                      placeholder="user@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </FormField>
 
-                  <div className="col-span-12 md:col-span-3">
-                    <FormField label="Name" error={errors.name}>
-                      <input
-                        className="input-text"
-                        type="text"
-                        name="name"
-                        placeholder="Name"
-                        value={formData.name}
-                        onChange={handleChange}
-                      />
-                    </FormField>
-                  </div>
+                  <FormField label="Name" error={errors.name}>
+                    <input
+                      className="input-text"
+                      type="text"
+                      name="name"
+                      placeholder="Full name"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                  </FormField>
 
                   {!selectedUser && (
                     <>
-                      <div className="col-span-12 md:col-span-3">
-                        <FormField label="Password" error={errors.password}>
-                          <input
-                            className="input-text"
-                            type="password"
-                            name="password"
-                            placeholder="Password"
-                            value={formData.password}
-                            onChange={handleChange}
-                          />
-                        </FormField>
-                      </div>
+                      <FormField label="Password" error={errors.password}>
+                        <input
+                          className="input-text"
+                          type="password"
+                          name="password"
+                          placeholder="••••••••"
+                          value={formData.password}
+                          onChange={handleChange}
+                        />
+                      </FormField>
 
-                      <div className="col-span-12 md:col-span-3">
-                        <FormField
-                          label="Confirm Password"
-                          error={errors.confirm_password}
-                        >
-                          <input
-                            className="input-text"
-                            type="password"
-                            name="confirm_password"
-                            placeholder="Confirm Password"
-                            value={formData.confirm_password}
-                            onChange={handleChange}
-                          />
-                        </FormField>
-                      </div>
+                      <FormField
+                        label="Confirm Password"
+                        error={errors.confirm_password}
+                      >
+                        <input
+                          className="input-text"
+                          type="password"
+                          name="confirm_password"
+                          placeholder="••••••••"
+                          value={formData.confirm_password}
+                          onChange={handleChange}
+                        />
+                      </FormField>
                     </>
                   )}
 
-                  <div className="col-span-12 md:col-span-3">
-                    <FormField label="User Type" error={errors.type}>
-                      <Select
-                        name="type"
-                        options={TYPE_OPTIONS}
-                        value={
-                          TYPE_OPTIONS.find((o) => o.value === formData.type) ||
-                          null
-                        }
-                        onChange={(option) =>
-                          handleChange(
-                            { name: "type", value: option?.value || "" },
-                            true,
-                          )
-                        }
-                        placeholder="Select Type"
-                        isClearable
-                      />
-                    </FormField>
-                  </div>
+                  <FormField label="User Type" error={errors.type}>
+                    <Select
+                      name="type"
+                      options={TYPE_OPTIONS}
+                      value={
+                        TYPE_OPTIONS.find((o) => o.value === formData.type) ||
+                        null
+                      }
+                      onChange={(option) =>
+                        handleChange(
+                          { name: "type", value: option?.value || "" },
+                          true,
+                        )
+                      }
+                      placeholder="Select type…"
+                      isClearable
+                    />
+                  </FormField>
 
-                  <div className="col-span-12 md:col-span-3">
-                    <FormField label="Company" error={errors.company_id}>
-                      <SelectOptions
-                        loadFunction={loadCompanies}
-                        value={formData.company_id}
-                        displayValue={formData.company_name ?? ""}
-                        onChange={(option) =>
-                          handleChange(
-                            {
-                              name: "company_id",
-                              value: option?.value || "",
-                              extraFields: {
-                                company_name: option?.label || "",
-                              },
-                            },
-                            true,
-                          )
-                        }
-                        placeholder="Search company..."
-                        isClearable
-                      />
-                    </FormField>
-                  </div>
+                  <FormField label="Company" error={errors.company_id}>
+                    <SelectOptions
+                      loadFunction={loadCompanies}
+                      value={formData.company_id}
+                      displayValue={formData.company_name ?? ""}
+                      onChange={(option) =>
+                        handleChange(
+                          {
+                            name: "company_id",
+                            value: option?.value || "",
+                            extraFields: { company_name: option?.label || "" },
+                          },
+                          true,
+                        )
+                      }
+                      placeholder="Search company…"
+                      isClearable
+                    />
+                  </FormField>
                 </div>
               </div>
 
-              <div className="form-footer flex justify-end gap-2">
+              <div className="form-footer mt-3">
                 <button
                   type="button"
                   className="btn-warning"
@@ -387,7 +386,7 @@ export default function User() {
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
-                  {selectedUser ? "Update" : "Save"}
+                  {selectedUser ? "Update User" : "Save User"}
                 </button>
               </div>
             </form>

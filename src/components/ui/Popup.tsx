@@ -1,3 +1,5 @@
+import { AlertTriangle } from "lucide-react";
+
 export type PopupFormValues = {
   title: string;
   body: string;
@@ -9,25 +11,38 @@ export type PopupFormValues = {
 export default function Popup(values: PopupFormValues) {
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 animate-in fade-in duration-300 z-40" />
-      <div className="fixed inset-0 flex items-center justify-center z-50 animate-in fade-in zoom-in-95 duration-300">
-        <div className="flex flex-col bg-bg w-full max-w-2xl border-2 border-border rounded-2xl overflow-hidden">
-          <div className="flex items-center bg-surface shadow-2xl h-12 text-xl font-semibold font-poppins px-5 w-full text-text">
-            {values.title}
+      <div className="popup-overlay" onClick={values.onCancel} />
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-5">
+        <div className="popup-box popup-animate">
+          <div className="popup-header">
+            <div className="popup-icon-danger">
+              <AlertTriangle size={18} />
+            </div>
+            <div>
+              <div className="popup-title">{values.title}</div>
+            </div>
           </div>
-          <div className="flex items-center bg-surface-2 text-base p-5 w-full font-poppins text-text min-h-[80px]">
-            {values.body}
-          </div>
-          <div className="flex flex-row items-center justify-end gap-2 p-3 bg-bg">
+
+          <div className="popup-body">{values.body}</div>
+
+          <div className="popup-footer">
             <button type="button" className="btn-warning" onClick={values.onCancel}>
               Cancel
             </button>
-            <button type="button" className="btn-primary" onClick={values.onConfirm}>
+            <button type="button" className="btn-danger" onClick={values.onConfirm}>
               {values.btnValue1}
             </button>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes popup-in {
+          from { opacity: 0; transform: scale(0.94) translateY(8px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .popup-animate { animation: popup-in 0.2s ease; }
+      `}</style>
     </>
   );
 }
