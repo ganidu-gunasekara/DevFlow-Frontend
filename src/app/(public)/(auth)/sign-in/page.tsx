@@ -42,7 +42,7 @@ export default function SignInPage() {
 
     try {
       const data = await loginUser(values);
-      setAuth(data.accessToken, data.user);
+      setAuth(data.access_token, data.user);
       setSuccessMessage("Login successful!");
       reset();
       router.push('/dashboard')

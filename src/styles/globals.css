@@ -694,6 +694,10 @@
   .text-muted {
     color: rgb(var(--muted));
   }
+  .text-subtle {
+    color: rgb(var(--muted));
+    font-size: 0.7rem; /* text-xs equivalent */
+  }
   .text-text {
     color: rgb(var(--text));
   }

@@ -78,7 +78,7 @@ export default function User() {
     if (!validate()) return;
     try {
       if (selectedUser) {
-        await updateUser(formData);
+        await updateUser(selectedUser.id,formData);
       } else {
         await createUser(formData);
       }

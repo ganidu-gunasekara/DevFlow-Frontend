@@ -13,6 +13,7 @@ export const createUserSchema = (isEdit = false) => z.object({
   company_id: z.number().nullable(),
   company_name: z.string().nullable(),
   type: z.string().min(1, "User type is required"),
+  selected_project_id: z.number().nullable().optional(),
 }).refine(d => isEdit || d.password === d.confirm_password, {
   message: "Passwords do not match",
   path: ["confirm_password"],
@@ -29,6 +30,7 @@ export const createUserDefaults: CreateUserPayload = {
   company_id: null,
   company_name: null,
   type: "",
+  selected_project_id: null,
 };
 
 

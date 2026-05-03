@@ -1,11 +1,20 @@
 import { apiFetch } from "../apiClients";
 import { CreateProjectPayload, UpdateProjectPayload } from "./project.schema";
 
-export async function getProjects() {
-  return await apiFetch(`/projects/get`, {
+export async function getProjects(select: boolean) {
+  const projects = await apiFetch(`/projects/get`, {
     method: "GET",
     credentials: "include",
   });
+
+  if(select){
+    return projects.map((project : any) => ({
+      value : project.id,
+      label : project.name
+    }))
+  }else{
+    return projects
+  }
 }
 
 export async function getProject(id: number) {

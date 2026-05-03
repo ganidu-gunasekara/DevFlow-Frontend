@@ -21,9 +21,9 @@ export default function AuthBootstrap() {
         if (!res.ok) throw new Error("Not logged in");
 
         const data = await res.json();
-        setAccessToken(data.accessToken);
-        setAuth(data.accessToken, data.user);
-      } catch {
+        setAccessToken(data.access_token);
+        setAuth(data.access_token, data.user);
+      } catch (err){
         clearAuth();
       } finally {
         setAuthReady(true);

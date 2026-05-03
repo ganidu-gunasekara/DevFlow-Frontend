@@ -1,11 +1,12 @@
 import { create } from "zustand";
 
 type User = {
-  _id : string | number
+  id : string | number
   email: string;
   name?: string;
   avatarUrl?: string;
   profileComplete?: boolean;
+  user_type: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'DEVELOPER' | 'QA_ENGINEER' | 'DESIGNER' | 'PRODUCT_OWNER';
 };
 
 type AuthState = {

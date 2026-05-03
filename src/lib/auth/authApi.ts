@@ -9,7 +9,7 @@ type RegisterResponse = {
 };
 
 export type LoginResponse = {
-  accessToken: string;
+  access_token: string;
   user: any;
 };
 

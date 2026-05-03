@@ -24,12 +24,12 @@ export async function createUser(data : CreateUserPayload){
     })
 }
 
-export async function updateUser(data : CreateUserPayload){
-    return await apiFetch(`/users/update/${data.id}`, {
-        method : "PATCH",
-        credentials : 'include',
-        body : data,
-    })
+export async function updateUser(id: number, data: Partial<CreateUserPayload>) {
+    return await apiFetch(`/users/update/${id}`, {
+        method: "PATCH",
+        credentials: 'include',
+        body: data,
+    });
 }
 
 export async function deleteUser(id: number) {

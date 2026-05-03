@@ -22,6 +22,7 @@ import { getUsers } from "@/src/lib/user/userApi";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FolderKanban, Plus, Users } from "lucide-react";
+import { useAuthStore } from "@/src/lib/auth/authStore";
 
 interface Project {
   id: number;
@@ -36,6 +37,10 @@ const COLUMNS = [
 ];
 
 export default function ProjectPage() {
+  const user = useAuthStore((state) => state.user);
+  const isAdminOrSuperAdmin =
+    user?.user_type === "SUPER_ADMIN" || user?.user_type === "ADMIN";
+
   const [activeTab, setActiveTab] = useState<"all" | "new">("all");
   const [projectList, setProjectList] = useState<Project[]>([]);
   const [serverError, setServerError] = useState("");
@@ -53,7 +58,7 @@ export default function ProjectPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await getProjects();
+      const data = await getProjects(false);
       setProjectList(data);
     } catch (err: any) {
       setServerError(err?.message || "Something went wrong");
@@ -258,31 +263,35 @@ export default function ProjectPage() {
                     />
                   </FormField>
 
-                  <FormField label="Company" error={errors.company_id}>
-                    <SelectOptions
-                      loadFunction={loadCompanies}
-                      value={formData.company_id}
-                      displayValue={formData.company_name ?? ""}
-                      onChange={(option) => {
-                        if (selectedUserIds.length > 0) {
-                          toast.warning(
-                            "Remove all assigned users before changing the company.",
+                  {isAdminOrSuperAdmin && (
+                    <FormField label="Company" error={errors.company_id}>
+                      <SelectOptions
+                        loadFunction={loadCompanies}
+                        value={formData.company_id}
+                        displayValue={formData.company_name ?? ""}
+                        onChange={(option) => {
+                          if (selectedUserIds.length > 0) {
+                            toast.warning(
+                              "Remove all assigned users before changing the company.",
+                            );
+                            return;
+                          }
+                          handleChange(
+                            {
+                              name: "company_id",
+                              value: option?.value || "",
+                              extraFields: {
+                                company_name: option?.label || "",
+                              },
+                            },
+                            true,
                           );
-                          return;
-                        }
-                        handleChange(
-                          {
-                            name: "company_id",
-                            value: option?.value || "",
-                            extraFields: { company_name: option?.label || "" },
-                          },
-                          true,
-                        );
-                      }}
-                      placeholder="Search company…"
-                      isClearable
-                    />
-                  </FormField>
+                        }}
+                        placeholder="Search company…"
+                        isClearable
+                      />
+                    </FormField>
+                  )}
 
                   <FormField label="Team Members">
                     <button
